@@ -1,6 +1,3 @@
-//first attempt at alternating
-
-
 $(document).ready(function(){
   var mili;
   var breakLen;
@@ -170,8 +167,11 @@ $(document).ready(function(){
       if (!counting){
 
         myVar = setInterval(countdown, 1000, oneSec = countdown(oneSec));
-        loop();
-
+        if (alternate == "break"){
+          loopTime();
+        } else {
+          loopBreak();
+        }
 
       };
 
