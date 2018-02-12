@@ -1,0 +1,209 @@
+$(document).ready(function(){
+//slider text (e.g. 13)
+var timeSliderNum;
+var breakSliderNum;
+//current countdown timer (e.g. 13:00)
+var currentTimer;
+// booleans for counting/pausing
+var paused = false;
+var counting;
+//set interval that calls the countdown function
+var mySetInt;
+//number of minutes remaining in countdown
+var minutes;
+//alternates between time and break
+var alternate = "time";
+
+// progress bar inital creation, green and text 'work'
+var bar = new ProgressBar.Circle(cont, {
+  color: '#a6a6a6',
+  strokeWidth: 4,
+  trailWidth: 4,
+  easing: 'linear',
+  duration: 1400,
+  text: {
+    autoStyleContainer: false
+  },
+  from: { color: '#00FF00', width: 4 },
+  to: { color: '#00FF00', width: 4 },
+  // Set default step function for all animate calls
+  step: function(state, circle) {
+    circle.path.setAttribute('stroke', state.color);
+    circle.path.setAttribute('stroke-width', state.width);
+    circle.setText("Work!");
+  }
+});
+//setting font for bar
+bar.text.style.fontFamily = '"Raleway", Helvetica, sans-serif';
+bar.text.style.fontSize = '2rem';
+
+//code when clicking the circle
+$('#cont').on("click",function (event){
+  // this is the countdown timer, increments seconds
+
+  function countdown(){
+    counting = true;
+    //update timer text on screen dependent on which is running
+    if (alternate == "time"){
+      $('#timeSliderValue').html(currentTimer);
+    } else {
+      $('#breakSliderValue').html(currentTimer);
+    }
+
+    var str = currentTimer.split('');
+    var seconds = str[str.length-2] + str[str.length-1];
+    seconds = parseInt(seconds);
+    // stop when reach 0:00
+    if (str[0] == "0" && seconds == "00"){
+      stopIt();
+    }
+    //when there are minutes left
+    if (str[0] >= "0"){
+      //if there are seconds left, remove 1
+      if (seconds > 0){
+        seconds -=1;
+        //this makes sure there are always 2 places even when less than 10 (so 09, instead of 9)
+        if (seconds < 10){
+          var zero = "0";
+          seconds = zero.concat(seconds);
+        }
+        // if seconds left and if number of minutes is less than 10 (a single number)
+        if (str[1] == ":"){
+          currentTimer = str[0] + ":" + seconds;
+          return str[0] + ":" + seconds;
+        } else {
+          minutes = str[0].concat(str[1]);
+          currentTimer = minutes + ":" + seconds;
+          return minutes + ":" + seconds;
+        }
+        //when there are no seconds left (and there are still minutes)
+      } else {
+        if (str[1] == ":"){
+          var replace = str[0] - 1;
+        } else{
+          minutes = str[0].concat(str[1]);
+          var replace = minutes - 1;
+        }
+        //after removing a minute, recent seconds to 59
+        seconds = 59;
+        currentTimer = replace + ":" + seconds;
+        return replace + ":" + seconds;
+      }
+    }
+    // reaches here when minutes and seconds on timer is less than 0
+    stopIt();
+  }
+
+  // if user clicks circle and previously clicked pause
+  if (paused){
+    //here check alternate to assign currentTimer text based on whether break or time
+    if (alternate == "time"){
+      currentTimer = $( "#timeSliderValue" ).text();
+    } else {
+      currentTimer = $( "#breakSliderValue" ).text();
+    }
+    //turn into a time and not just a number
+    currentTimer = currentTimer + ":00";
+
+    var str = currentTimer.split('');
+    //secs is number of seconds when user clicks pause (removes minutes)
+    var secs = str[str.length-2] + str[str.length-1];
+    secs = parseInt(secs);
+    console.log("secs:" + secs);
+    //when continuing bar animation after pause, run for remaining amount of seconds
+    bar.animate(1, {duration: secs*1000});
+    mySetInt = setInterval(countdown, 1000, currentTimer = countdown(currentTimer));
+  } else {
+    // if you havent paused and click circle, animate the bar and call the countdown function in setInterval
+    // this function animates the bar
+    function loop(whichTimer,colour) {
+      //timeSliderNum is in minutes, so times by 60k for timeSliderNumseconds
+      bar.animate(1,  {
+        duration: whichTimer*60000,
+        color: colour}, function() {
+        if (alternate == "time"){
+          alternate = "break";
+          currentTimer= breakSliderNum + ":00";
+          loop(currentTimer, "#ff0000")
+        } else {
+          alternate = "time";
+          currentTimer = timeSliderNum + ":00";
+          loop(currentTimer, '#00FF00')
+        }
+      });
+
+    }
+
+    function stopIt(){
+      counting = false;
+      clearInterval(mySetInt);
+
+    }
+    // this prevents the timer running multiple times - will only run if currently not running a timer.
+    if (!counting){
+
+      // numbers below sliders
+      timeSliderNum = $( "p.time" ).text();
+      breakSliderNum = $( "p.break" ).text();
+      // turning slider numbers into centre clock
+      //here check alternate, assign currentTimer with either timeSliderNum or breakSliderNum
+      if (alternate == "time"){
+        //if it's currently time, switch to break numbers and red colour
+        currentTimer= breakSliderNum + ":00";
+        mySetInt = setInterval(countdown, 1000, currentTimer = countdown(currentTimer));
+        loop(currentTimer, "#ff0000");
+      } else {
+        //if it's currently break, reverse
+        currentTimer = timeSliderNum + ":00";
+        mySetInt = setInterval(countdown, 1000, currentTimer = countdown(currentTimer));
+        loop(currentTimer, '#00FF00');
+
+      }
+
+
+
+    };
+
+  }
+  paused = false;
+});
+
+$('#pause').on('click', function(event){
+  paused = true;
+  bar.stop();
+  clearInterval(mySetInt);
+})
+
+$('#stop').on('click', function(event){
+  paused = false;
+  bar.set(0);
+  currentTimer= timeSliderNum + ":00";
+  counting = false;
+  currentTimer = $( "#timeSliderVal" ).text() + ":00";
+
+  $('#timeSliderValue').html(currentTimer);
+  clearInterval(mySetInt);
+})
+
+//slider code
+$('.slider').each(function (){
+  var output = document.getElementById(this.id.concat("Val"));
+  output.innerHTML = this.value;
+
+  this.oninput = function() {
+    output.innerHTML = this.value;
+
+
+    // change the centre clocks based on sliders
+    // only change when coutdown isn't happening
+    if (!counting){
+      var toChange = "#" + this.id + "Value";
+      $(toChange).html(this.value + ":00");
+
+    }
+
+  }
+
+});
+
+});
