@@ -67,3 +67,6 @@ console.log("function result: " + play(board, human));
 //console.log(win(winTestBoard, human));
 //should print false
 //console.log(win(board, computer));
+
+
+//http://web.cs.ucla.edu/~rosen/161/notes/alphabeta.html
