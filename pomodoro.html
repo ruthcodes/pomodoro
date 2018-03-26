@@ -1,0 +1,29 @@
+<div class=container>
+  <div class="row">
+    <div class="col-sm-12">
+      <h1>Pomodoro Clock</h1>
+
+    </div>
+  </div>
+  
+  
+  <div class="row">
+    <div class="col-sm-6 left"><div class="slidecontainer">
+      <p id="b">Break</p>
+      <input type="range" min="1" max="25" value="13" class="slider sliderBreak" id="breakSlider">
+      <p id="breakSliderVal" class="break">13</p>
+      </div></div>
+    <div class="col-sm-6 right"> <div class="slidecontainer">
+      <p>Work</p>
+      <input type="range" min="1" max="25" value="13" class="slider sliderTime" id="timeSlider"><p class="time" id="timeSliderVal">13</p></div></div>
+
+  </div>
+  <div class="row">
+    <div class="col-sm-12 timer"><p id="timeSliderValue">13:00</p><p id="breakSliderValue">13:00</p><div id="cont"></div></div>
+  </div>
+  <div class="row myButtons">
+    <div class=col-sm-12><button class="btn btn-outline-light" id="pause"><i class="fa fa-pause" aria-hidden="true"></i></button><button class="btn btn-outline-light" id="stop"><i class="fa fa-stop" aria-hidden="true"></i></button></div>
+  </div>
+</div>
+
+
